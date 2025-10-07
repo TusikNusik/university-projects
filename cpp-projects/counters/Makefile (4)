@@ -1,0 +1,33 @@
+CXX=/opt/llvm/19.1.4/bin/clang++
+CXXFLAGS=-std=c++20 -O2 -Wall -Wextra
+PCHFLAGS=-Wno-experimental-header-units -Wno-pragma-system-header-outside-header -xc++-system-header --precompile
+PCMFLAGS=-Wno-experimental-header-units -fprebuilt-module-path=. --precompile
+
+counters: counters.o event.o counter.o counter_manager.o
+	$(CXX) $^ -o $@
+
+.PHONY: clean
+
+# Pre-compiled headers
+%.pch:
+	$(CXX) $(CXXFLAGS) $(PCHFLAGS) $* -o $@
+
+# Pre-compiled modules
+event.pcm: event.cppm cstdint.pch ostream.pch
+	$(CXX) $(CXXFLAGS) $(PCMFLAGS) -fmodule-file=cstdint.pch -fmodule-file=ostream.pch $< -o $@
+	
+counter.pcm: counter.cppm cstdint.pch vector.pch utility.pch event.pcm
+	$(CXX) $(CXXFLAGS) $(PCMFLAGS) -fmodule-file=cstdint.pch -fmodule-file=vector.pch -fmodule-file=utility.pch $< -o $@
+
+counter_manager.pcm: counter_manager.cppm cstdint.pch unordered_map.pch memory.pch vector.pch algorithm.pch iostream.pch event.pcm counter.pcm
+	$(CXX) $(CXXFLAGS) $(PCMFLAGS) -fmodule-file=cstdint.pch -fmodule-file=unordered_map.pch -fmodule-file=memory.pch -fmodule-file=vector.pch -fmodule-file=algorithm.pch -fmodule-file=iostream.pch $< -o $@
+	
+counters.pcm: counters.cppm memory.pch iostream.pch regex.pch counter_manager.pcm counter.pcm 
+	$(CXX) $(CXXFLAGS) $(PCMFLAGS) -fmodule-file=memory.pch -fmodule-file=iostream.pch -fmodule-file=regex.pch $< -o $@
+
+# Object files
+%.o: %.pcm
+	$(CXX) $(CXXFLAGS) -fprebuilt-module-path=. -c $< -o $@
+
+clean:
+	rm -rf *.o *.pch *.pcm counters
