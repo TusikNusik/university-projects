@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+pandas
+matplotlib
+wordfreq
+pytest
+lxml
+ipykernel

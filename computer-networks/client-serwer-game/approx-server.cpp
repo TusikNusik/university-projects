@@ -78,7 +78,7 @@ class ServerData {
 
                 for (size_t j = 1; j <= N; j++) {
                     polyResult += x * polyCoeffs[j];
-                    x = x * x;
+                    x *= i;
                 }
 
                 double tempResult = (polyResult - userResult)*(polyResult - userResult);

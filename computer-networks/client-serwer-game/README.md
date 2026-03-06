@@ -1,44 +1,90 @@
-The repository contains a project in C++ that I wrote as part of a graded assignment for the Computer Networks course. Below is a shortened description of the task.
+# The Great Approximator (Wielki Aproksymator)
 
-Running the make command should produce two executables: approx-server and approx-client (the server and the client, respectively). The assignment simulates a game.
+## Project Overview
+"The Great Approximator" is a TCP-based client-server game. Players (represented by client programs) compete to best approximate a polynomial provided by the server. The polynomial is defined as:
 
-The goal of each player (represented by the client program) is to approximate as accurately as possible a polynomial of degree N received from the server, in integer points from 0 to K.
-Initially, the values of the approximating function f are zero. Approximation is performed by adding a given value at a given point specified by the client. For example, for K=3 and the command to add 0.5 at point 2.
+$$f(x) = \sum_{i=0}^N a_i x^i$$
 
-Communication between the client and the server is text-based over a TCP connection, using either IPv4 or IPv6. Each message ends with a carriage return character (ASCII code 13) and a newline character (ASCII code 10), denoted as \r\n. Fields in messages are separated by a single space. There are no other whitespace characters in the messages.
+The approximation is evaluated at integer points from $0$ to $K$. Initially, the approximating function $\hat{f}(x)$ has a value of $0$ at all points. Players iteratively send values to be added to specific points. The player with the lowest penalty score at the end of the game wins.
 
-Server and Client Run Parameters
-Server
+The score (penalty) is calculated as the sum of squared deviations from the expected values:
 
-The server is started with the command approx-server with the following parameters:
+$$\sum_{x=0}^K (\hat{f}(x) - f(x))^2$$
 
--p port – the server port number, an integer between 0 and 65535 in base 10. Optional, default is 0.
+Additional penalties are added for invalid moves or protocol violations. The game ends after the server processes a total of $M$ valid additions.
 
--k value – the value of constant K, an integer in the range 1–10000 in base 10. Optional, default is 100.
+---
 
--n value – the value of constant N, an integer in the range 1–8 in base 10. Optional, default is 4.
+## Building and Running
 
--m value – the value of constant M, an integer in the range 1–12341234 in base 10. Optional, default is 131.
+### Server
+The server handles multiple clients concurrently via TCP (IPv4 and IPv6) without blocking.
 
--f file – the name of the file containing server messages with the polynomial coefficients (see the description of the COEFF message). Mandatory.
+**Command:**
+`approx-server [options] -f file`
 
-The server listens on the given TCP port for client connections. If the port number is zero, the server chooses an arbitrary port. It must be possible to establish connections with the server using both IPv6 and IPv4.
-If the computer running the server does not support IPv6 communication, it must still be possible to connect via IPv4.
+**Parameters:**
+* `-p port`: Server port (0-65535, default: 0 for random port).
+* `-k value`: Constant $K$ (1-10000, default: 100).
+* `-n value`: Constant $N$ (1-8, default: 4).
+* `-m value`: Constant $M$, total valid moves to end the game (1-12341234, default: 131).
+* `-f file`: **(Required)** Path to the file containing polynomial coefficients.
 
-Client
+### Client
+The client connects to the server and interacts either manually via standard input or automatically.
 
-The client is started with the command approx-client with the following parameters:
+**Command:**
+`approx-client -u player_id -s server -p port [options]`
 
--u player_id – the player identifier consisting of digits and uppercase/lowercase English letters. Mandatory.
+**Parameters:**
+* `-u player_id`: **(Required)** Alphanumeric player identifier.
+* `-s server`: **(Required)** Server address or hostname.
+* `-p port`: **(Required)** Server port (1-65535).
+* `-4`: Force IPv4 communication.
+* `-6`: Force IPv6 communication.
+* `-a`: Enable automatic strategy mode (must be better than random). If omitted, the client reads `$point $value` pairs from standard input.
 
--s server – the server address or hostname. Mandatory.
+---
 
--p port – the server port number, an integer between 1 and 65535 in base 10. Mandatory.
+## Communication Protocol
 
--4 – force communication with the server via IPv4. Optional.
+All communication is text-based. Every message must end with `\r\n` (CRLF). Fields are separated by a single space. Decimal numbers can have up to 7 decimal places.
 
--6 – force communication with the server via IPv6. Optional.
+### Connection & Initialization
+1.  **Client connects** and must send within 3 seconds:
+    `HELLO $player_id\r\n`
+2.  **Server responds** with the polynomial coefficients (read from the `-f` file):
+    `COEFF $a_0 $a_1 ... $a_N\r\n`
+    *(Coefficients are rational numbers between -100 and 100).*
 
--a – selects the type of strategy (see the section “Client Strategy”). Optional.
+### Gameplay
+1.  **Client sends a move** to add `$value` at `$point`:
+    `PUT $point $value\r\n`
+    * `$point`: Integer between $0$ and $K$.
+    * `$value`: Rational number between -5 and 5.
 
-If both -4 and -6 are provided, or if neither is given, the client should choose the protocol version based on the first IP address assigned to the server.
+2.  **Server processes the move**:
+    * **Valid move:** Server updates $\hat{f}(x)$, delays the response by $X$ seconds (where $X$ is the number of lowercase letters in `$player_id`), and responds with the current state:
+        `STATE $r_0 ... $r_K\r\n`
+    * **Invalid values ($point out of bounds, etc.):** Server waits 1 second, applies a 10-point penalty, and responds:
+        `BAD_PUT $point $value\r\n`
+    * **Protocol Violation (Sending PUT before COEFF or before the previous STATE response):** Server applies a 20-point penalty and responds immediately:
+        `PENALTY $point $value\r\n`
+
+### Game End
+Once the server has processed $M$ valid `PUT` messages across all connected clients, it broadcasts the final scores:
+
+`SCORING $player_id_1 $result_1 $player_id_2 $result_2 ...\r\n`
+
+* Player IDs are sorted lexicographically.
+* After sending this, the server disconnects all clients, resets its state, waits 1 second, and starts over (without resetting the position in the coefficients file).
+* Upon receiving `SCORING`, clients exit with code 0.
+
+---
+
+## Error Handling & Diagnostics
+
+* **Standard Errors:** Invalid parameters, bad input lines, or unexpected disconnections print an error to `stderr` formatted as `ERROR: $error_description\n` and exit with code 1.
+* **Protocol Errors:** Unexpected or malformed messages trigger an error log:
+    `ERROR: bad message from [$ip_address]:$port, $player_id: $message\n`
+    *(If `$player_id` is unknown, `UNKNOWN` is used).*
