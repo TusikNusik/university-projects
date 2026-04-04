@@ -1,0 +1,24 @@
+{
+  "name": "route-planner",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node ./node_modules/typescript/lib/tsc.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TusikNusik/Zad3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TusikNusik/Zad3/issues"
+  },
+  "homepage": "https://github.com/TusikNusik/Zad3#readme",
+  "description": "A Django route planner with interactive boards, paths, and a REST API.",
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

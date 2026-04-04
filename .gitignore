@@ -1,0 +1,9 @@
+# Django web app generated files
+Django-web-app/**/__pycache__/
+Django-web-app/**/*.py[cod]
+Django-web-app/.pytest_cache/
+Django-web-app/node_modules/
+Django-web-app/venv/
+Django-web-app/.venv/
+Django-web-app/db.sqlite3
+Django-web-app/mysite/media/

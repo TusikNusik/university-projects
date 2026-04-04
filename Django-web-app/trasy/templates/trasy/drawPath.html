@@ -1,0 +1,19 @@
+{% extends 'trasy/base.html' %}
+{% load static %}
+
+{% block list %}
+    <h2>Draw Path on: {{ board.name }}</h2>
+    <p class="page-intro">Select neighboring cells to build a continuous route and save it when you are done.</p>
+
+    <div id="grid" data-rows="{{ board.rows }}" data-cols="{{ board.cols }}"></div>
+
+    <button id="savePath" class="blue-button">Save path</button>
+    <button id="undoPath" class="blue-button">Undo one point</button>
+    <button id="clearPath" class="blue-button">Clear all</button>
+    <script>
+        const boardId = {{ board.id }};
+        const initialDots = {{ dots_json|safe }};
+        const initialPath = {{ saved_path|safe }};
+    </script>
+    <script type="module" src="{% static 'js/dist/drawPath.js' %}"></script>
+{% endblock %}

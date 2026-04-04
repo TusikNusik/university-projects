@@ -1,0 +1,38 @@
+{% extends 'trasy/base.html' %}
+{% load static %}
+
+{% block title %}
+Point List Adding
+{% endblock %}
+
+
+{% block list %} 
+    <script src="{% static 'js/dist/drawPoint.js' %}" defer></script>
+
+    <h1>Point list: {{ list.name }}</h1>
+    <p class="page-intro">Click on the map to fill the coordinate inputs, then save the point into the list.</p>
+    <div id="map-container" class="map-container">
+        <img id="map-image" src="{{ list.backgroundImage.image.url }}" alt="{{ list.backgroundImage.name }}" class="map-image">
+        <canvas id="map-canvas" class="map-canvas"></canvas>
+    </div>
+    {{ included_points|json_script:"points-data" }}
+
+    <h3>Below is the list ({{ list }}) of your added points:</h3>
+
+    <form method="post" class="form-send">
+        {% csrf_token %}
+        <ul class="content-list">
+            {% for item in list.points.all %}
+                <li>
+                    <input type="checkbox" value="included" name="{{ item.id }}" {% if item.included %}checked{% endif %} class="point-item" data-x="{{ item.x }}" data-y="{{ item.y }}">
+                    {{ item }}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <button type="submit" name="save" value="save" class="blue-button">Save</button>
+        <input type="number" name="X-cord" placeholder="X-cord">
+        <input type="number" name="Y-cord" placeholder="Y-cord">
+        <button type="submit" name="addPoint" value="addPoint" class="blue-button">Add Point</button>
+    </form>
+{% endblock%}

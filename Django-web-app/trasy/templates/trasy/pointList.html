@@ -1,0 +1,15 @@
+{% extends 'trasy/base.html' %}
+
+{% block title %}
+Point List page
+{% endblock %}
+
+
+{% block list %} 
+    <h1>Below is the list of your added points:</h1>
+    <ul class="content-list">
+        {% for item in pointList %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+{% endblock%}

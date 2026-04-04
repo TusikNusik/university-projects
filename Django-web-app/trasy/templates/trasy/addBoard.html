@@ -1,0 +1,16 @@
+{% extends 'trasy/base.html' %}
+
+{% block title %}
+Add Board page
+{% endblock %}
+
+
+{% block list %} 
+    <h1>Add new Board here:</h1>
+    <p class="page-intro">Create a board grid first, then place dots and save path layouts on top of it.</p>
+    <form method="post" enctype="multipart/form-data" action="{% url 'addBoard' %}" class="form-send">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" name="Save" class="blue-button">Add board</button>
+    </form>
+{% endblock%}

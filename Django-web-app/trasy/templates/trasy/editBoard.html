@@ -1,0 +1,28 @@
+{% extends 'trasy/base.html' %}
+{% load static %}
+
+{% block list %}
+    <h2>Edit Board: {{ board.name }}</h2>
+    <p class="page-intro">Adjust the grid size, choose a color, and place up to two matching dots on the board.</p>
+
+    <div>
+        <div>
+            <label>Rows: <input type="number" id="rows" value="{{ board.rows }}"></label>
+            <label>Cols: <input type="number" id="cols" value="{{ board.cols }}"></label>
+            <button id="generate-grid" class="yellow-button" type="button">Generate Grid</button>
+            <button id="saveBoard" class="yellow-button" type="button">Save</button>
+        </div>
+
+        <div>
+            <label>Pick color: <input type="color" id="colorPicker" value="#ff0000"></label>
+        </div>
+
+        <div id="grid" class="grid-board"></div>
+    </div>
+
+    <script>
+        const boardId = {{ board.id|safe }};
+        const initialDots = {{ dots_json|safe }};
+    </script>
+    <script src="{% static 'js/dist/editBoard.js' %}" defer></script>
+{% endblock %}

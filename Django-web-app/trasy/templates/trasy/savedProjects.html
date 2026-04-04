@@ -1,0 +1,15 @@
+{% extends 'trasy/base.html' %}
+
+{% block title %}
+Your Lists · Routes Studio
+{% endblock %}
+
+
+{% block list %} 
+    <h1>Your saved lists</h1>
+    <ol class="content-list">
+        {% for item in user_lists %}
+            <li><a href="{% url 'addPoint' item.id %}">{{ item.name }}</a></li>
+        {% endfor %}
+    </ol>
+{% endblock%}

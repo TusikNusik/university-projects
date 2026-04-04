@@ -1,0 +1,17 @@
+{% extends "trasy/base.html" %}
+
+{% block title %}
+
+Register Page
+
+{% endblock %}
+
+{% block log %}
+
+    <form method="post" class="form-send">
+        {% csrf_token %}
+        {{form}}
+        <button type="submit" class="blue-button">Continue</button>
+    </form>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %} Route Planner {% endblock %}</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="{% static 'trasy/styles.css' %}" rel="stylesheet">
+    </head>
+    <body>
+        <div class="upper-sidebar">
+            <div class="topbar-inner">
+                <div class="brand-block">
+                    <p class="brand-kicker">Interactive board editor</p>
+                    <p class="brand-title">Route Planner</p>
+                </div>
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="yellow-button">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="yellow-button">Log in</a>
+            {% endif %}
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <p class="sidebar-title">Navigation</p>
+            <ol class="nav-list">
+                <li><a href="{% url 'addList' %}">Add list</a></li>
+                <li><a href="{% url 'points' %}">All points</a></li>
+                <li><a href="{% url 'savedProjects' %}">Your projects</a></li>
+                <li><a href="{% url 'addBoard' %}">Add board</a></li>
+                <li><a href="{% url 'savedBoards' %}">Your boards</a></li>
+                <li><a href="{% url 'allBoards' %}">All boards available</a></li>
+                <li><a href="{% url 'savedPaths' %}">Saved paths</a></li>
+                <li><a href="{% url 'maslo' %}">Maslo</a></li>
+            </ol>
+        </div>
+
+        <script src="{% static 'js/dist/main.js' %}" defer></script>
+        <div class="rest">
+            <div class="content-shell">
+            {% if user.is_authenticated %}
+                {% block list %}
+                    <p>Choose an action from the navigation to start working.</p>
+                {% endblock %}
+            {% else %}
+                {% block log %}
+                    <a href="{% url 'login' %}">Log in</a>
+                {% endblock %}
+            {% endif %}
+            </div>
+        </div>
+    </body>
+</html>

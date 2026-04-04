@@ -1,0 +1,15 @@
+{% extends 'trasy/base.html' %}
+
+{% block title %}
+Browse Boards · Routes Studio
+{% endblock %}
+
+
+{% block list %} 
+    <h1>ALL BOARDS HERE:</h1>
+    <ol class="content-list">
+        {% for item in boards %}
+            <li><a href="{% url 'drawPath' item.id %}">{{ item.name }}</a></li>
+        {% endfor %}
+    </ol>
+{% endblock%}

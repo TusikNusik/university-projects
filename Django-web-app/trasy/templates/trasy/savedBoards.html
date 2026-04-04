@@ -1,0 +1,15 @@
+{% extends 'trasy/base.html' %}
+
+{% block title %}
+All projects
+{% endblock %}
+
+
+{% block list %} 
+    <h1>Your saved boards</h1>
+    <ol class="content-list">
+        {% for item in user_lists %}
+            <li><a href="{% url 'editBoard' item.id %}">{{ item.name }}</a></li>
+        {% endfor %}
+    </ol>
+{% endblock%}
